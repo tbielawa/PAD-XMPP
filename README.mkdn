@@ -1,0 +1,54 @@
+Intruduction
+============
+
+This project is all about me. It's a programming project which I'll be
+using to finally get experience in areas I've identified as being
+"less than knowledgeable in." Concurrency, Internationalization,
+Sockets, and Security.
+
+### Concurrency ###
+
+I've never programmed with a mindset of concurrency. I'll be learning
+all about that. I've researched and decided on using Erlang as the
+language for implementation. It's got a long history, stable language
+structure, and fully featured library. It's also declarative and
+functional. Declarative programming is an area I need to brush up on,
+functional is an affinity I gained from LISP.
+
+### Sockets ###
+
+I've never programmed a socket in my life. As this is an XMPP daemon
+and client project, there will be lots of sockets.
+
+### Security ###
+
+XMPP puts a lot of weight on high security, this allows me to gain
+experience with the last thing I identified. TLS, SSL, Certificates,
+etc, I'll be learning about all of these topics.
+
+### Internationalization ###
+
+I've never had to consider programming with characters outside the
+normal scope of what I can type with my keyboard. Section 11.5 of XMPP
+Core specifies that implementations MUST support UTF-8, so now's my
+chance to learn how.  (UTF-8:
+http://www.rfc-editor.org/rfc/rfc3629.txt)
+
+
+Making a real project
+=====================
+
+Other areas I want to concentrate in are:
+
+### Profiling ###
+
+Identifying bottlenecks, intensive operations
+
+### Testing ###
+
+Unit tests for functionality and regression
+
+### Modularity ###
+
+Learn how to code a system for plug-ins and make each unit of
+functionality a plug-in.
