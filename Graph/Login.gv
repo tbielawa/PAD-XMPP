@@ -59,12 +59,13 @@ digraph ConnectionStates {
 		"Bind Client Resource" -> "Bad Data\nSent in Bind" [label="Receive <bad-request/>"];
 		"Bad Data\nSent in Bind" -> "Bind Client Resource" [label="Retry Bind"];
 		
+		"Bind Server Resource" -> "Bind Not Allowed" [label="Receive <not-allowed/>"];
 		"Bind Client Resource"-> "Bind Not Allowed" [label="Receive <not-allowed/>"];
 		
 		"Bind Client Resource" -> "Resource in Use" [label="Receive <conflict/>"];
 		fontsize = 20;
 	}
 	
-	label = "States Transformations during\n the XMPP Connection Process";
+	label = "States Transitions during\n the XMPP Connection Process";
 	fontsize = 20;
 }
