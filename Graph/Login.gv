@@ -1,0 +1,70 @@
+digraph ConnectionStates {
+	overlap = false;
+	
+	node [shape=diamond]; "Bad Encoding" "Tmp Auth Fail" "TLS_FAIL" "Bind Not Allowed" "Resource in Use"
+	node [shape=parallelogram]; "Feature Selection";
+	node [shape=ellipse];
+
+	"Disconnected" -> "TCP Connected" [label="Open TCP\nConnection\nSuccessful"];
+	"Disconnected" -> "Disconnected" [label="Open TCP\nConnection\nUnsuccessful"];
+	"TCP Connected" -> "Wait Return Stream" [label="Open <stream/>"];
+	"Wait Return Stream" -> "Wait Stream Features" [label="Receive Return <stream/>"];
+	"Wait Stream Features" -> "Feature Selection" [label="Receive Stream <features/>"];
+	
+	"Feature Selection" -> "(1) Wait TLS Proceed" [label="<starttls/>"];
+	"Feature Selection" -> "(2) Auth Mechanism\nSelected" [label="Select Auth\n<mechanism/>"];
+	"Feature Selection" -> "(3) Ready to Bind";
+	
+	"TLS_FAIL" -> "Disconnected" [label="Stream Closed\nTCP Disconnected"];
+	"Bad Encoding" -> "Disconnected" [label="Stream Closed\nTCP Disconnected"];
+	"Tmp Auth Fail" -> "Disconnected" [label="Stream Closed\nTCP Disconnected"];
+	"Bind Not Allowed" -> "Disconnected" [label="Stream Closed\nTCP Disconnected"];
+	"Resource in Use" -> "Disconnected" [label="Stream Closed\nTCP Disconnected"];
+	
+	"TLS OK" -> "Wait Return Stream" [label="Open TLS\nProtected Stream"];
+	"SASL Success" -> "Wait Return Stream" [label="Open Authenticated\n<stream/>"];
+	
+	subgraph cluster_TLSStates {
+		label = "TLS States";
+		color = black;
+		"(1) Wait TLS Proceed" -> "TLS_FAIL" [label="TLS Failure"];
+		"(1) Wait TLS Proceed" -> "Ready TLS" [label="Receive TLS\n<proceed/>"];
+		"Ready TLS" -> "TLS_FAIL" [label="Unsuccessful"];
+		"Ready TLS" -> "TLS OK" [label="Successful"];
+		fontsize = 20;
+	}
+	
+	subgraph cluster_SASLStates {
+		label = "SASL States";
+		color = black;
+		"(2) Auth Mechanism\nSelected" -> "Challenge Received" [label="Server Sends\n<challenge/>"];
+		"(2) Auth Mechanism\nSelected" -> "Bad Encoding" [label="Receive <incorrect-encoding/>"];
+		"Challenge Received" -> "Response Sent" [label="Send <response/>"];
+		"Response Sent" -> "Second Challenge\nReceived" [label="Receive second\n<challenge/>"];
+		"Second Challenge\nReceived" -> "Second Response Sent" [label="Send second\n<response/>"];
+		"Second Response Sent" -> "SASL Success" [label="Receive <success/>"];
+		"Second Response Sent" -> "Tmp Auth Fail" [label="Receive\n<temporary-auth-failure/>"];
+		fontsize = 20;
+	}
+	
+	subgraph cluster_BindStates {
+		label = "Bind States";
+		color = black;
+		"(3) Ready to Bind" -> "Bind Client Resource" [label="Select Resource"];
+		"(3) Ready to Bind" -> "Bind Server Resource" [label="Let Server\nSelect Resource"];
+		
+		"Bind Client Resource" -> "Received <jid/>" [label="Server Confirms\nSelected Resource"];
+		"Bind Server Resource" -> "Received <jid/>" [label="Receive Server\nGenerated Resource"];
+		
+		"Bind Client Resource" -> "Bad Data\nSent in Bind" [label="Receive <bad-request/>"];
+		"Bad Data\nSent in Bind" -> "Bind Client Resource" [label="Retry Bind"];
+		
+		"Bind Client Resource"-> "Bind Not Allowed" [label="Receive <not-allowed/>"];
+		
+		"Bind Client Resource" -> "Resource in Use" [label="Receive <conflict/>"];
+		fontsize = 20;
+	}
+	
+	label = "States Transformations during\n the XMPP Connection Process";
+	fontsize = 20;
+}
