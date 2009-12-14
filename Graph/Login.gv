@@ -96,6 +96,6 @@ digraph ConnectionStates {
 		fontsize = 20;
 	}
 	
-	label = "States Transitions during\n the XMPP Connection Process";
+	label = "State Transitions during\n the XMPP Connection Process";
 	fontsize = 30;
 }
