@@ -1,8 +1,16 @@
 digraph ConnectionStates {
 	overlap = false;
+	
+	// Diamonds represent Fatal Error States
 	node [shape=diamond]; "SASL Fail" "TLS Fail" "Bind Fail" "Other Error";
+	
+	// Hexagons represent Successful Exit States
 	node [shape=hexagon]; "SASL OK" "TLS OK" "Bind OK";
+	
+	// Rectangles represent Non-Fatal Error States
 	node [shape=rectangle]; "Bad Data\nSent in Bind";
+	
+	// Double Circle represents the "Fully-Connected" State
 	node [shape=doublecircle]; "XML Stanza\nExchange OK";
 	node [shape=ellipse];
 
@@ -96,6 +104,6 @@ digraph ConnectionStates {
 		fontsize = 20;
 	}
 	
-	label = "State Transitions during\n the XMPP Connection Process";
+	label = "State Transitions during\n the XMPP Client Connection Process";
 	fontsize = 30;
 }
