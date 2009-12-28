@@ -3,9 +3,9 @@
 
 SHELL = /bin/sh
 OSTYPE := $(shell /usr/bin/uname -s)
-INITMOD = simple_shell
+INITMOD = test_tcp_accept
 INITFUNC = start
-#INITARGS = 
+#INITARGS = []
 
 # OS X?
 ifeq ("$(findstring Darwin, $(OSTYPE))", "Darwin")
@@ -18,7 +18,7 @@ else
 endif
 
 all:
-	$(FIND) . -type f -name "*.erl" -exec erlc '{}' \;
+	$(FIND) . -name "*.erl" -exec erlc '{}' \;
 
 clean:
 	$(FIND) . \( -regex "^[.]?(.+)\~$$" -o -regex "./[.]?#.*#" \) -delete

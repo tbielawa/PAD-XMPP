@@ -2,6 +2,11 @@
 %%% Author  : Tim Bielawa <timbielawa@gmail.com>
 %%% Description : Testing a simple server listening on socket.
 %%% Created : 14 Dec 2009 by Tim Bielawa <timbielawa@gmail.com>
+%%% Based off the example code for gen_tcp online,
+%%% modified to accept simultaneous connections.
+%%%
+%%% Source: http://www.erlang.org/doc/man/gen_tcp.html
+
 -module(test_tcp_accept).
 -export([start/0]).
 
@@ -46,7 +51,7 @@ retry_listener(Port, {attempt, Attempt}) ->
 get_packets() ->
     io:format("get_packets() waiting...~n"),
     receive
-	{ok, Pkt, Sock} ->
+	{ok, Pkt, _Sock} ->
 	    io:format("They said: ~p~n", [Pkt]),
 	    io:format("MSG: Responding to connection~n"),
 	    get_packets();
