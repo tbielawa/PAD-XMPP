@@ -10,9 +10,11 @@
 -module(test_tcp_accept).
 -export([start/0]).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 start() ->
     start(5678, {attempt, 1}).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 start(Port, {attempt, Attempt}) ->
     case gen_tcp:listen(Port, [binary, {packet, 0},
 			       inet, {active, false},
@@ -26,6 +28,7 @@ start(Port, {attempt, Attempt}) ->
 	    io:format("MSG: Other error received:~n~p~n", [Error])
     end.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 server(LSocket) ->
     io:format("TCP Listener activated~n"),
     io:format("Waiting for incoming socket.~n"),
@@ -39,6 +42,7 @@ server(LSocket) ->
     io:format("Spawnned do_recv packet slurper~n"),
     start().
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 retry_listener(Port, {attempt, Attempt}) ->
     case Attempt of
 	5 ->
@@ -48,17 +52,19 @@ retry_listener(Port, {attempt, Attempt}) ->
 	    start(Port, {attempt,Attempt})
     end.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 get_packets() ->
     io:format("get_packets() waiting...~n"),
     receive
-	{ok, Pkt, _Sock} ->
-	    io:format("They said: ~p~n", [Pkt]),
+	{ok, Pkt, Sock} ->
+ 	    io:format("They said: ~p~n", [Pkt]),
 	    io:format("MSG: Responding to connection~n"),
 	    get_packets();
 	{done} ->
 	    io:format("MSG: Connection closed~n")
     end.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 do_recv(PPid, Sock) ->
     gen_tcp:send(Sock, "PAD-XMPP> "),
     case gen_tcp:recv(Sock, 0) of
