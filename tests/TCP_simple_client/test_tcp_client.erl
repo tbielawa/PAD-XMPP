@@ -18,7 +18,9 @@ process_line(Line) ->
     case pad_misc:first(Token_String) of
 	"q" ->
 	    log(["PROCESS_LINE", "quit", []]),
-	    main ! {exit, "Goodbye!"};
+	    main ! {exit, normal};
+	"c" ->
+	    connect();
 	Else ->
 	    log(["PROCESS_LINE", "unknown", Else]),
 	    main ! {line, Token_String}
@@ -36,4 +38,15 @@ loop() ->
 	Else ->
 	    log(["LOOP", "unknown message", Else]),
 	    loop()
+    end.
+
+connect() ->
+    try gen_tcp:connect("localhost",
+			5678,
+			[binary, {packet, 0}]) of
+	{ok, _Socket} ->
+	    log(["CONNECT", "open connection", "Connection opened"])
+    catch
+	{error, Reason} ->
+	    log(["CONNECT", "open connection", Reason])
     end.
