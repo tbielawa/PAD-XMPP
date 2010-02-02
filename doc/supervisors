@@ -1,0 +1,23 @@
+This document describes the heirarchy of supervisors.
+
+CONNECTIONS
+===========
+
+The connection process begins by launching the padxmpp-listener
+supervisor (1). This supervisor is charged with establishing and
+maintaining all of the padxmpp-tcpserver supervisors (2). Each
+tcpserver supervisor handles keeping alive a pool of tcp acceptors (3)
+for a specific interface. Once a TCP connection has been accepted the
+socket is then handed off to the finite state machine (4) which
+finally authenticates the connection and marks it ready to transmit
+XML stanzas.
+
+(1)       padxmpplistener
+                | (1+)
+(2)       padxmpp-tcpserver
+                | (1+)
+(3)       padxmpp-accept
+	        | (1)
+(4)       padxmpp-auth
+
+
