@@ -41,14 +41,17 @@ init(_Args) ->
     {ok, 0}.
 
 % Called for each event called through notify/2 or sync_notify/2
-handle_event(_Event, State) ->
+handle_event(Event, State) ->
+    io:format("it's an event~n"),
+    io:format("~p~n", [Event]),
     {ok, State}.
 
-handle_call(_Request, State) ->
+handle_call(Request, State) ->
+    io:format("it's a call~n~p~n",[Request]),
     Reply = ok,
     {ok, Reply, State}.
 
 % Catch-all handler
-handle_info(_Info, State) -> {ok, State}.
+handle_info(Info, State) -> io:format("it's.... catch-all'd~n~p~n", [Info]), {ok, State}.
 terminate(_Arg, _State) -> ok.
 code_change(_Old, State, _Extra) -> {ok, State}.

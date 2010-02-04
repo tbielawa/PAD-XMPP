@@ -42,7 +42,8 @@ startd() ->
     unlink(Pid).
 
 start_link(Args) ->
-    supervisor:start_link({local,?MODULE}, ?MODULE, Args).
+    supervisor:start_link({local,?MODULE}, ?MODULE, Args),
+    error_logger:add_report_handler(pevent).
 
 init([]) ->
     {ok, {{one_for_one, 3, 10},
@@ -52,7 +53,7 @@ init([]) ->
 	    permanent, 
 	    10000, 
 	    worker, 
-	    [pevent]},
+	    [dynamic]},
 	   {padxmpp_conn_listener,
 	    {padxmpp_conn_listener, start_link, []},
 	    permanent, 

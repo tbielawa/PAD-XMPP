@@ -31,6 +31,6 @@ etags:
 	find . -name "*.[he]rl" -print | etags -
 
 run:
-	erl -noshell -s $(INITMOD) $(INITFUNC) -pa $(CURDIR)
+	erl -noshell -s $(INITMOD) $(INITFUNC) -pa $(CURDIR) #-boot start_sasl
 
 .PHONY : clean distclean all run

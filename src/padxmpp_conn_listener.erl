@@ -39,7 +39,6 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    plog:startup(?MODULE),
     io:format("    Going to listen on ~s:~w~n", [?HOST, ?PORT]),
     case gen_tcp:listen(?PORT, [list, 
 			       {packet, 0},
@@ -92,6 +91,6 @@ accept_loop(LSocket) ->
 	{ok, Sock} ->
 	    gen_server:cast(?MODULE, {handle_connection, Sock});
 	{error, Reason} ->
-	    io:write("    Socket accept error: ~s~n", [Reason])
+	    io:format("    Socket accept error: ~s~n", [Reason])
     end,
     accept_loop(LSocket).
