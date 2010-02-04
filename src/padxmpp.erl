@@ -27,49 +27,48 @@
 %%%-------------------------------------------------------------------
 
 -module(padxmpp).
--import("shared.hrl").
+-behaviour(supervisor).
 
--export([start/0,launch_gen_server/1]).
+-export([start/0, startd/0, start_link/1, init/1]).
+-include("shared.hrl").
 
 start() ->
-    Servers = [
-	       #server{name="Connection Listener", module=padxmpp_conn_listener},
-	       #server{name="Connection Table", module=padxmpp_conn_table},
-	       #server{name="XML Scanner", module=padxmpp_xml_scan}
-	      ],
-    lists:foreach(fun(Srv) -> launch_gen_server(Srv) end, Servers).
+    spawn(fun() ->
+		  supervisor:start_link({local,?MODULE}, ?MODULE, _Arg = [])
+	  end).
 
-%%     io:format("Starting gen_server:padxmpp_conn_table...~n"),
-%%     case gen_server:start_link(
-%% 	   {local, padxmpp_conn_table},
-%% 	   padxmpp_conn_table, [], []) of
-%% 	{ok, _} ->
-%% 	    io:format("Connection table started successfully.~n", []);
-%% 	{error, _} ->
-%% 	    io:format("Error Starting padxmpp_conn_table.~n", []);
-%% 	ignore ->
-%% 	    io:format("Told to 'ignore'.~n")
-%%     end,
-    
-%%     case gen_server:start_link(
-%% 	   {local, padxmpp_xml_scan},
-%% 	   padxmpp_xml_scan, [], []) of
-%% 	{ok, _} ->	
-%% 	    io:format("XML Scanner Loaded~n",[]);
-%% 	{error, _} ->
-%% 	    io:format
-    
+startd() ->
+    {ok, Pid} = supervisor:start_link({local,?MODULE}, ?MODULE, _Arg = []),
+    unlink(Pid).
 
-launch_gen_server(#server{name=Name, module=Module} = Srv) ->
-    io:format("Starting gen_server:~s...~n",[Module]),
-    case gen_server:start_link(
-	   {local, Module},
-	   Module, [], []) of
-	{ok, _} ->
-	    io:format("~s(~s) successfully.~n", [Name, Module]);
-	{error, Err} ->
-	    io:format("Error starting ~s(~s)~n", [Name, Module]),
-	    io:format("~60.5p~n", [Err]);
-	ignore ->
-	    io:format("Told to 'ignore' in ~s(~s)?~n",[Name, Module])
-    end.
+start_link(Args) ->
+    supervisor:start_link({local,?MODULE}, ?MODULE, Args).
+
+init([]) ->
+    {ok, {{one_for_one, 3, 10},
+	  [
+	   {pevent,
+	    {pevent, start_link, []},
+	    permanent, 
+	    10000, 
+	    worker, 
+	    [pevent]},
+	   {padxmpp_conn_listener,
+	    {padxmpp_conn_listener, start_link, []},
+	    permanent, 
+	    10000, 
+	    worker, 
+	    [padxmpp_conn_listener]},
+	   {padxmpp_conn_table, 
+	    {padxmpp_conn_table, start_link, []},
+	    permanent, 
+	    10000, 
+	    worker, 
+	    [padxmpp_conn_table]},
+	   {padxmpp_xml_scan,
+	    {padxmpp_xml_scan, start_link, []},
+	    permanent, 
+	    10000, 
+	    worker, 
+	    [padxmpp_xml_scan]}
+	  ]}}.

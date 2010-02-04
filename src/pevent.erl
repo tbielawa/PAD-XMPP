@@ -22,12 +22,33 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 
 %%%-------------------------------------------------------------------
-%%% File    : padxmpp_auth_fsm.erl
-%%% Description : State machine controlling the authentication process
+%%% File    : pevent.erl
+%%% Description : PAD-XMPP Event Manager
 %%%-------------------------------------------------------------------
--module(padxmpp_auth_fsm).
--export([start/2]).
 
-start(Sock, _ConnId) ->
-    {ok, ContFun} = gen_server:call(padxmpp_xml_scan, {gen_continue_fun, Sock}),
-    ok.
+-module(pevent).
+-behaviour(gen_event).
+
+-export([start/0, start_link/0, init/1, handle_event/2,
+	 handle_call/2, handle_info/2, terminate/2,
+	 code_change/3]).
+
+start() -> spawn(fun() -> start_link() end).
+start_link() ->
+    gen_event:start_link({local, ?MODULE}).
+
+init(_Args) ->
+    {ok, 0}.
+
+% Called for each event called through notify/2 or sync_notify/2
+handle_event(_Event, State) ->
+    {ok, State}.
+
+handle_call(_Request, State) ->
+    Reply = ok,
+    {ok, Reply, State}.
+
+% Catch-all handler
+handle_info(_Info, State) -> {ok, State}.
+terminate(_Arg, _State) -> ok.
+code_change(_Old, State, _Extra) -> {ok, State}.

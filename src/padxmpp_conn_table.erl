@@ -63,8 +63,9 @@ handle_cast(write_connection_table, Table) ->
     {noreply, Table};
 
 handle_cast(dump_connection_table, Table) ->
+    io:format("Dumping connection table~n", []),
     Dump = ets:match(Table, '$1'),
-    io:format("~62.5p~n", [Dump]),
+    io:format(" ~p~n", [Dump]),
     {noreply, Table};
 
 handle_cast(_Msg, State) ->

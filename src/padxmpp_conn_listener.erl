@@ -39,21 +39,22 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    io:format("Going to listen on ~s:~w~n", [?HOST, ?PORT]),
+    plog:startup(?MODULE),
+    io:format("    Going to listen on ~s:~w~n", [?HOST, ?PORT]),
     case gen_tcp:listen(?PORT, [list, 
 			       {packet, 0},
 			       inet, 
 			       {active, false},
 			       {reuseaddr, true}]) of
 	{ok, LSocket} ->
-	    io:format("TCP server started~n", []),
+	    io:format("    TCP server started~n", []),
 	    register(accept_loop, spawn(fun() -> accept_loop(LSocket) end)),
 	    {ok, LSocket};
 	{error, eaddrinuse} ->
-	    io:format("TCP server failed to start: Address already in use~n", []),
+	    io:format("    TCP server failed to start: Address already in use~n", []),
 	    {stop, eaddrinuse};
 	{error, Error} ->
-	    io:format("TCP server failed to start: unknown error~n", []),
+	    io:format("    TCP server failed to start: unknown error~n", []),
 	    io:format("~w~n", Error),
 	    {stop, Error}
     end.
@@ -86,11 +87,11 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 accept_loop(LSocket) ->
-    io:format("Acceptor loop entered~n"),
+    io:format("    Acceptor loop entered~n"),
     case gen_tcp:accept(LSocket) of
 	{ok, Sock} ->
 	    gen_server:cast(?MODULE, {handle_connection, Sock});
 	{error, Reason} ->
-	    io:write("Socket accept error: ~s~n", [Reason])
+	    io:write("    Socket accept error: ~s~n", [Reason])
     end,
     accept_loop(LSocket).

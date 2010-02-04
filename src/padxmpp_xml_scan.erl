@@ -29,10 +29,11 @@
 
 -module(padxmpp_xml_scan).
 -behaviour(gen_server).
+
 -export([start_link/0, start/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
--export([main/2,continue_fun/1,event_fun/0]).
+
 -include("shared.hrl").
 -include_lib("xmerl/include/xmerl.hrl").
 
@@ -41,20 +42,15 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).	    
 
 init([]) ->
-    ok.
-
-%%% {
+    {ok, none}.
 
 %%     xmerl_scan:string("", [{continuation_fun, ?MODULE:continue_fun(Sock)},
 %% 			  {{event_fun, ?MODULE:event_fun()}]).
 
-
-
-%%% {continue_fun, Socket}
 %%% Responds with a continuation_fun/3 suitable for use in xmerl
-handle_call({gen_continue_fun, Socket}, From, State) ->
+handle_call({gen_continue_fun, Socket}, _From, State) ->
     Reply = fun(Continue, _Exception, GlobalState) ->
-		    case gen_tcp:recv(Socket,0) of
+		    case gen_tcp:recv(Socket, 0) of
 			{ok, Data} ->
 			    io:format("Received some daters~n",[]),
 			    io:format("Data: ~w~n", [Data]),
@@ -67,9 +63,6 @@ handle_call({gen_continue_fun, Socket}, From, State) ->
 
 handle_call(_Request, _From, LSocket) ->
     {reply, ok, LSocket}.
-
-handle_cast(_Request, State) ->
-    {noreply, State};
 
 handle_cast(_Msg, State) ->
     io:format("Default cast handler reached.~n"),
