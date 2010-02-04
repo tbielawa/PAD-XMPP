@@ -29,5 +29,5 @@
 -export([start/2]).
 
 start(Sock, _ConnId) ->
-    {ok, ContFun} = gen_server:call(padxmpp_xml_scan, {gen_continue_fun, Sock}),
+    {ok, _ContFun} = gen_server:call(padxmpp_xml_scan, {gen_continue_fun, Sock}),
     ok.

@@ -39,6 +39,9 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
+    {ok, 0}.
+
+handle_call(start_listening, _From, State) ->
     io:format("    Going to listen on ~s:~w~n", [?HOST, ?PORT]),
     case gen_tcp:listen(?PORT, [list, 
 			       {packet, 0},
@@ -47,8 +50,7 @@ init([]) ->
 			       {reuseaddr, true}]) of
 	{ok, LSocket} ->
 	    io:format("    TCP server started~n", []),
-	    register(accept_loop, spawn(fun() -> accept_loop(LSocket) end)),
-	    {ok, LSocket};
+	    {reply, LSocket, LSocket};
 	{error, eaddrinuse} ->
 	    io:format("    TCP server failed to start: Address already in use~n", []),
 	    {stop, eaddrinuse};
@@ -56,9 +58,14 @@ init([]) ->
 	    io:format("    TCP server failed to start: unknown error~n", []),
 	    io:format("~w~n", Error),
 	    {stop, Error}
-    end.
+    end;
 
-handle_call(_Request, _From, LSocket) ->
+handle_call(begin_looping, _From, LSocket) ->
+    register(accept_loop, spawn(fun() -> accept_loop(LSocket) end)),
+    {reply, accept_loop, LSocket};
+
+handle_call(Request, _From, LSocket) ->
+    io:format("Random request:~n~p~n", [Request]),
     {reply, ok, LSocket}.
 
 handle_cast({handle_connection, Sock}, State) ->
@@ -75,6 +82,7 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 terminate(_Reason, _State) ->
+    erlang:exit(accept_loop, going_down),
     gen_server:cast(padxmpp_conn_table, dump_connection_table),
     ok.
 

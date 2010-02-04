@@ -42,6 +42,7 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).	    
 
 init([]) ->
+    io:format("XML_SCAN Started"),
     {ok, none}.
 
 %%     xmerl_scan:string("", [{continuation_fun, ?MODULE:continue_fun(Sock)},

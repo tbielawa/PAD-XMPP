@@ -29,21 +29,12 @@
 -module(padxmpp).
 -behaviour(supervisor).
 
--export([start/0, startd/0, start_link/1, init/1]).
+-export([start/0, start_link/0, init/1]).
 -include("shared.hrl").
 
-start() ->
-    spawn(fun() ->
-		  supervisor:start_link({local,?MODULE}, ?MODULE, _Arg = [])
-	  end).
-
-startd() ->
-    {ok, Pid} = supervisor:start_link({local,?MODULE}, ?MODULE, _Arg = []),
-    unlink(Pid).
-
-start_link(Args) ->
-    supervisor:start_link({local,?MODULE}, ?MODULE, Args),
-    error_logger:add_report_handler(pevent).
+start() -> spawn(fun() -> start_link() end).
+start_link() ->
+    supervisor:start_link({local,?MODULE}, ?MODULE, []).
 
 init([]) ->
     {ok, {{one_for_one, 3, 10},
