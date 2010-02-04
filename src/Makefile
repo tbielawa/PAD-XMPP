@@ -20,12 +20,15 @@ endif
 all: clean
 	$(FIND) . -name "*.erl" -exec erlc '{}' \;
 
-clean:
+clean: dumpclean
 	$(FIND) . \( -regex "^[.]?(.+)\~$$" -o -regex "./[.]?#.*#" \) -delete
 	$(FIND) . -name "*.beam" -delete
 
-distclean: clean
+dumpclean:
 	$(FIND) . -name *.dump -delete
+
+etags: 
+	find . -name "*.[he]rl" -print | etags -
 
 run:
 	erl -noshell -s $(INITMOD) $(INITFUNC) -pa $(CURDIR)

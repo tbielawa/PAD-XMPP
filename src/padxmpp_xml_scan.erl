@@ -22,50 +22,54 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 
 %%%-------------------------------------------------------------------
-%%% File    : padxmpp_conn_table.erl
-%%% Description : Maintains a connection table.
-%%%               Seemed like a good idea at the time.
+%%% File    : padxmpp_xml_scanner.erl
+%%% Description : a gen_server to make a gen_tcp socket act like an xml stream
 %%%-------------------------------------------------------------------
 
--module(padxmpp_conn_table).
--behaviour(gen_server).
 
+-module(padxmpp_xml_scan).
+-behaviour(gen_server).
 -export([start_link/0, start/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
-
+-export([main/2,continue_fun/1,event_fun/0]).
 -include("shared.hrl").
--define(CONN_FILE, "connections.tab").
+-include_lib("xmerl/include/xmerl.hrl").
 
 start() -> spawn(fun() -> start_link() end).
-
 start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).	    
 
 init([]) ->
-    {ok, ets:new(?CONN_TABLE, 
-		 [private, named_table, 
-		  {write_concurrency, false},
-		 {keypos,2}])}.
+    ok.
 
-handle_call({register_connection, Sock}, _From, Table) ->
-    {_,_,NewId} = erlang:now(),
-    ConnectionTime = calendar:local_time(),
-    NewConn = #connection{id=NewId, socket=Sock, connected_at=ConnectionTime},
-    ets:insert(Table, NewConn),
-    {reply, {ok, NewId}, Table};
+%%% {
 
-handle_call(request, _From, Table) ->
-    {reply, ok, Table}.
+%%     xmerl_scan:string("", [{continuation_fun, ?MODULE:continue_fun(Sock)},
+%% 			  {{event_fun, ?MODULE:event_fun()}]).
 
-handle_cast(write_connection_table, Table) ->
-    ets:tab2file(Table, ?CONN_FILE),
-    {noreply, Table};
 
-handle_cast(dump_connection_table, Table) ->
-    Dump = ets:match(Table, '$1'),
-    io:format("~62.5p~n", [Dump]),
-    {noreply, Table};
+
+%%% {continue_fun, Socket}
+%%% Responds with a continuation_fun/3 suitable for use in xmerl
+handle_call({gen_continue_fun, Socket}, From, State) ->
+    Reply = fun(Continue, _Exception, GlobalState) ->
+		    case gen_tcp:recv(Socket,0) of
+			{ok, Data} ->
+			    io:format("Received some daters~n",[]),
+			    io:format("Data: ~w~n", [Data]),
+			    Continue(Data, GlobalState);
+			{error, closed} ->
+			    _Exception(GlobalState)
+		    end
+	    end,
+    {reply, Reply, State};
+
+handle_call(_Request, _From, LSocket) ->
+    {reply, ok, LSocket}.
+
+handle_cast(_Request, State) ->
+    {noreply, State};
 
 handle_cast(_Msg, State) ->
     io:format("Default cast handler reached.~n"),
@@ -79,7 +83,3 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------

@@ -35,13 +35,12 @@
 -include("shared.hrl").
 
 start() -> spawn(fun() -> start_link() end).
-
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
     io:format("Going to listen on ~s:~w~n", [?HOST, ?PORT]),
-    case gen_tcp:listen(?PORT, [binary, 
+    case gen_tcp:listen(?PORT, [list, 
 			       {packet, 0},
 			       inet, 
 			       {active, false},
@@ -72,25 +71,13 @@ handle_cast(_Msg, State) ->
     io:format("Default cast handler reached.~n"),
     {noreply, State}.
 
-%%--------------------------------------------------------------------
-%% Function: handle_info(Info, State) -> {noreply, State} |
-%%                                       {noreply, State, Timeout} |
-%%                                       {stop, Reason, State}
-%% Description: Handling all non call/cast messages
-%%--------------------------------------------------------------------
 handle_info(_Info, State) ->
     {noreply, State}.
 
-%%--------------------------------------------------------------------
-%% Function: terminate(Reason, State) -> void()
 terminate(_Reason, _State) ->
-    gen_server:cast(padxmpp_conn_listener, dump_connection_table),
+    gen_server:cast(padxmpp_conn_table, dump_connection_table),
     ok.
 
-%%--------------------------------------------------------------------
-%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
-%% Description: Convert process state when code is changed
-%%--------------------------------------------------------------------
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -99,6 +86,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 accept_loop(LSocket) ->
+    io:format("Acceptor loop entered~n"),
     case gen_tcp:accept(LSocket) of
 	{ok, Sock} ->
 	    gen_server:cast(?MODULE, {handle_connection, Sock});
