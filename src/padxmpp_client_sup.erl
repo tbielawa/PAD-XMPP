@@ -22,58 +22,27 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 
 %%%-------------------------------------------------------------------
-%%% File    : padxmpp_xml_scanner.erl
-%%% Description : a gen_server to make a gen_tcp socket act like an xml stream
+%%% File    : padxmpp_client_sup.erl
+%%% Description : Supervisor of the connections pool
+%%%         After accepting a socket you should call
+%%%    {ok, Pid} = padxmpp_client_sup:add_child(ChildFSMSpec())
+%%%
+%%%           ChildFSMSpec() = ChildSpec with module: [padxmpp_auth_fsm]
+%%%    After that start an XML Stream Scanner and assign socket 
+%%%    ownership to it. Send events to the child FSM of scanned stanzas
 %%%-------------------------------------------------------------------
 
+-module(padxmpp_client_sup).
+-behaviour(supervisor).
 
--module(padxmpp_xml_scan).
--behaviour(gen_server).
-
--export([start_link/0, start/0]).
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-	 terminate/2, code_change/3]).
-
+-export([start/0, start_link/0, init/1]).
 -include("shared.hrl").
--include_lib("xmerl/include/xmerl.hrl").
 
 start() -> spawn(fun() -> start_link() end).
 start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).	    
+    supervisor:start_link({local,?MODULE}, ?MODULE, []).
 
 init([]) ->
-    error_logger:info_msg("XML_SCAN Started"),
-    {ok, none}.
-
-%%     xmerl_scan:string("", [{continuation_fun, ?MODULE:continue_fun(Sock)},
-%% 			  {{event_fun, ?MODULE:event_fun()}]).
-
-%%% Responds with a continuation_fun/3 suitable for use in xmerl
-handle_call({gen_continue_fun, Socket}, _From, State) ->
-    Reply = fun(Continue, _Exception, GlobalState) ->
-		    case gen_tcp:recv(Socket, 0) of
-			{ok, Data} ->
-			    io:format("Received some daters~n",[]),
-			    io:format("Data: ~w~n", [Data]),
-			    Continue(Data, GlobalState);
-			{error, closed} ->
-			    _Exception(GlobalState)
-		    end
-	    end,
-    {reply, Reply, State};
-
-handle_call(_Request, _From, LSocket) ->
-    {reply, ok, LSocket}.
-
-handle_cast(_Msg, State) ->
-    io:format("Default cast handler reached.~n"),
-    {noreply, State}.
-
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-terminate(_Reason, _State) ->
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+    {ok, {{one_for_one, 3, 10},
+	  [
+	  ]}}.

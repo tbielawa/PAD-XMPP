@@ -22,52 +22,16 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 
 %%%-------------------------------------------------------------------
-%%% File    : padxmpp.erl
-%%% Description : Starts the show
+%%% File    : padxmpp_app.erl
+%%% Description : Called by the daemonic process overlord for bootup.
 %%%-------------------------------------------------------------------
 
--module(padxmpp).
--behaviour(supervisor).
+-module(padxmpp_app).
+-behaviour(application).
+-export([start/2, stop/1]).
 
--export([start/0, start_link/0, init/1]).
--include("shared.hrl").
+start(_Type, _StartArgs) ->
+    padxmpp:start().
 
-start() -> spawn(fun() -> start_link() end).
-start_link() ->
-    supervisor:start_link({local,?MODULE}, ?MODULE, []),
-    error_logger:info_msg("We made it past the supervisor loading. Thank the gods.").
-
-init([]) ->
-    {ok, {{one_for_one, 3, 10},
-	  [
-	   {pevent,
-	    {pevent, start_link, []},
-	    permanent, 
-	    10000, 
-	    worker, 
-	    [dynamic]},
-	   {padxmpp_client_sup,
-	    {padxmpp_client_sup, start_link, []},
-	    permanent, 
-	    10000, 
-	    worker, 
-	    [padxmpp_client_sup]},
-	   {padxmpp_conn_listener,
-	    {padxmpp_conn_listener, start_link, []},
-	    permanent, 
-	    brutal_kill,
-	    worker, 
-	    [padxmpp_conn_listener]},
-	   {padxmpp_conn_table, 
-	    {padxmpp_conn_table, start_link, []},
-	    permanent, 
-	    10000, 
-	    worker, 
-	    [padxmpp_conn_table]},
-	   {padxmpp_xml_scan,
-	    {padxmpp_xml_scan, start_link, []},
-	    permanent, 
-	    10000, 
-	    worker, 
-	    [padxmpp_xml_scan]}
-	  ]}}.
+stop(_State) ->
+    ok.

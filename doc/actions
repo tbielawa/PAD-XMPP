@@ -1,0 +1,38 @@
+...client... state machine.. server..?
+
+
+Accept TCP Connection, Receive Socket.
+--> Spawn FSM, Set state [TCP_CONNECTED]. Capture PID.
+
+--> Exit Accept loop
+--> Transfer Socket Control to XML Stream Scanner.
+--> Compile closure with owned socket in a continuation function.
+
+XML Stream Scanner. Reads from continuation function to identify
+<stream> opening. and attempts to build up <message/>, <iq/>, and
+<presence/> stanzas.
+
+For the State Machine to advance to the next state the initiating
+entity must first send an opening <stream>. When this token is
+discovered in the XML Stream Parser an event is sent to the State
+Machine recognizing the client has opened a stream. The server will
+now respond to the client by also sending an open <stream> tag.
+
+An event will be sent to the State Machine after the returning
+<stream> is sent. 
+
+
+When a <stream> is received the FSM should be sent an event notifying
+it. From [TCP_CONNECTED] it may advance to [WAIT_STREAM_RETURN] when
+the process has registered the
+
+
+TCP_CONNECTED -> WAIT_RETURN_STREAM
+Server receives a <stream>
+
+WAIT_RETURN_STREAM -> WAIT_STREAM_FEATURES
+Server returns a <stream>
+
+WAIT_STREAM_FEATURES -> TLS_AVAILABLE
+Server sends applicable <features/>
+
