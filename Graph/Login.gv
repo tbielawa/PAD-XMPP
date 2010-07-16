@@ -65,7 +65,7 @@ digraph ConnectionStates {
 	subgraph cluster_TLSStates {
 		label = "TLS States";
 		color = black;
-		"TlS Requested" -> "Wait TLS Proceed" [label="Send\n<starttls/>"];
+		"TLS Requested" -> "Wait TLS Proceed" [label="Send\n<starttls/>"];
 		"Wait TLS Proceed" -> "TLS Fail" [label="TLS Failure"];
 		"Wait TLS Proceed" -> "Ready TLS" [label="Receive TLS\n<proceed/>"];
 		
@@ -123,7 +123,7 @@ digraph ConnectionStates {
 		"TLS Available?" -> "Want TLS?" [label="Yes"];
 		"TLS Available?" -> "SASL Available?" [label="No"];
 		
-		"Want TLS?" -> "TlS Requested" [label="Yes"];
+		"Want TLS?" -> "TLS Requested" [label="Yes"];
 		"Want TLS?" -> "SASL Available?" [label="No"];
 		
 		"SASL Available?" -> "Auth Mechanism\nSelected" [label="Yes"];
